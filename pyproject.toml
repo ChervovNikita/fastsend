@@ -1,0 +1,12 @@
+[project]
+name = "fastsend"
+version = "0.1.0"
+description = "Fast file transfer over direct TCP — RunPod-friendly croc alternative"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "tqdm",
+]
+
+[project.scripts]
+fastsend = "fastsend:main"
