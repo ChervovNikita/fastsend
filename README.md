@@ -7,7 +7,7 @@ Supports single files, multiple files, and entire folders.
 ## Install
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ChervovNikita/fastsend/main | bash
+curl -fsSL https://raw.githubusercontent.com/ChervovNikita/fastsend/main/install.sh | bash
 ```
 
 ## Usage
