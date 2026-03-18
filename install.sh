@@ -22,29 +22,33 @@ echo "Installing fastsend into project venv..."
 cd "$DIR"
 uv sync
 
-ln -sf "$DIR/.venv/bin/fastsend" "$BIN/fastsend"
+cat > "$BIN/fastsend" <<EOF
+#!/usr/bin/env bash
+exec "$DIR/.venv/bin/python" "$DIR/fastsend.py" "\$@"
+EOF
+chmod +x "$BIN/fastsend"
 
 echo
 echo "fastsend installed to $BIN/fastsend"
 echo
 
+PATH_EXPORT='export PATH="$HOME/.local/bin:$PATH"'
+
+case "${SHELL##*/}" in
+  zsh) PROFILE="$HOME/.zshrc" ;;
+  bash) PROFILE="$HOME/.bashrc" ;;
+  *) PROFILE="$HOME/.profile" ;;
+esac
+
+touch "$PROFILE"
+if ! grep -Fxq "$PATH_EXPORT" "$PROFILE"; then
+  echo "$PATH_EXPORT" >> "$PROFILE"
+  echo "Added $BIN to PATH in $PROFILE"
+else
+  echo "$BIN is already configured in $PROFILE"
+fi
+
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  PATH_EXPORT='export PATH="$HOME/.local/bin:$PATH"'
-
-  case "${SHELL##*/}" in
-    zsh) PROFILE="$HOME/.zshrc" ;;
-    bash) PROFILE="$HOME/.bashrc" ;;
-    *) PROFILE="$HOME/.profile" ;;
-  esac
-
-  touch "$PROFILE"
-  if ! grep -Fxq "$PATH_EXPORT" "$PROFILE"; then
-    echo "$PATH_EXPORT" >> "$PROFILE"
-    echo "Added $BIN to PATH in $PROFILE"
-  else
-    echo "$BIN is already configured in $PROFILE"
-  fi
-
   echo "Open a new shell (or run: source \"$PROFILE\") to use fastsend."
   echo
 fi
