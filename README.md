@@ -34,6 +34,24 @@ Run this on the sender:
   fastsend send 52.10.1.4:12001 --token F3K9A1 FILE [FILE ...]
 ```
 
+### Push mode (receiver connects back)
+
+Inverse workflow: the **sending** machine opens a listener on its symmetric port, then prints a command for the **receiving** machine to connect outbound and start the transfer.
+
+```bash
+fastsend send push checkpoints/
+```
+
+The sender will print a command like:
+
+```bash
+fastsend receive --connect 52.10.1.4:12001 --token F3K9A1
+```
+
+On the receiving machine, run that printed command (it will connect to the sender and download the files).
+
+Note: the receiver recreates the directory structure relative to its current working directory.
+
 ### Send a single file
 
 ```bash
