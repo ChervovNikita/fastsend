@@ -13,14 +13,43 @@ curl -fsSL "$REPO/fastsend.py"    -o "$DIR/fastsend.py"
 curl -fsSL "$REPO/pyproject.toml" -o "$DIR/pyproject.toml"
 curl -fsSL "$REPO/uv.lock"        -o "$DIR/uv.lock" || true
 
-if ! command -v uv &>/dev/null; then
+UV_BIN="$(command -v uv || true)"
+
+if [[ -z "$UV_BIN" ]] && [[ -x "$HOME/.local/bin/uv" ]]; then
+  UV_BIN="$HOME/.local/bin/uv"
+fi
+
+if [[ -z "$UV_BIN" ]]; then
   echo "Installing uv..."
   curl -LsSf https://astral.sh/uv/install.sh | sh
+  if [[ -x "$HOME/.local/bin/uv" ]]; then
+    UV_BIN="$HOME/.local/bin/uv"
+  else
+    UV_BIN="$(command -v uv || true)"
+  fi
 fi
 
 echo "Installing fastsend into project venv..."
 cd "$DIR"
-uv sync
+if [[ -n "$UV_BIN" ]]; then
+  if ! "$UV_BIN" sync; then
+    echo "uv sync failed, falling back to pip..."
+    UV_BIN=""
+  fi
+fi
+
+if [[ -z "$UV_BIN" ]]; then
+  echo "uv not available, falling back to pip..."
+  PYTHON_BIN="$(command -v python3 || command -v python || true)"
+  if [[ -z "$PYTHON_BIN" ]]; then
+    echo "python3/python is required to install fastsend."
+    exit 1
+  fi
+
+  "$PYTHON_BIN" -m venv "$DIR/.venv"
+  "$DIR/.venv/bin/pip" install --upgrade pip
+  "$DIR/.venv/bin/pip" install requests tqdm
+fi
 
 cat > "$BIN/fastsend" <<EOF
 #!/usr/bin/env bash
